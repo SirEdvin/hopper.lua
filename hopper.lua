@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11152248"
+version = "v1.5 ALPHA11152254"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -760,6 +760,7 @@ local function chest_wrap(chest, recursed)
               if details ~= nil then
                 stack_sizes_cache[details.name] = details.maxCount
                 display_name_cache[details.name..";"..(details.nbt or "")] = details.displayName
+                tags_cache[details.name] = details.tags
               end
             end
           else
@@ -1345,9 +1346,7 @@ local function num_in_ranges(num, ranges, size)
 end
 
 local function has_tag(tag, name)
-  if tags_cache[name] then
-    return tags_cache[name][tag]
-  end
+  return tags_cache[name][tag]
 end
 
 -- check if slot matches a specific filter
