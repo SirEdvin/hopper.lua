@@ -679,7 +679,6 @@ local function chest_wrap(chest, recursed)
             slot_limits_cache[chest] = nil
             return {}
           end
-          pprint(slot_limits_cache[chest])
           for i,item in pairs(l) do
             local lim = slot_limits_cache[chest].limits[i]
             local limit = limit_calculation(lim, item.name)
@@ -943,6 +942,12 @@ local function num_in_ranges(num, ranges, size)
 end
 
 local function has_tag(tag, name)
+  if tag == nil then
+    error("BUG DETECTED: first arg to has_tag is nil", 2)
+  end
+  if name == nil then
+    error("BUG DETECTED: second arg to has_tag is nil", 2)
+  end
   return tags_cache[name][tag]
 end
 
