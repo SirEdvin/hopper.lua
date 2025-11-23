@@ -730,16 +730,17 @@ local function chest_wrap(chest, recursed)
     if tanks then
       -- FIXME: how do i fetch displayname of fluids????
       for fi,fluid in pairs(tanks) do
+        local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
         if fluid.name ~= "minecraft:empty" then
           table.insert(l, fluid_start+fi, {
             name = fluid.name,
             count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
-            limit = (tank_capacities and tank_capacities[fi]) or 1/0,
+            limit = slot_limit,
             limit_is_constant = true,
             type = "f",
           })
         else
-          table.insert(l, fluid_start+fi, {type = "f", limit = 1/0, count = 0})
+          table.insert(l, fluid_start+fi, {type = "f", limit = slot_limit, limit_is_constant = true, count = 0})
         end
       end
       if c.isAE2 or c.getInfo then
