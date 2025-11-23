@@ -541,6 +541,7 @@ local function chest_wrap(chest, recursed)
     local l = {}
     local s
     local tanks
+    local tank_capacities
     local early_return
     PROVISIONS.scan_task_manager:await({
       function()
@@ -555,6 +556,14 @@ local function chest_wrap(chest, recursed)
         if c.tanks then
           tanks = stubbornly(c.tanks)
           if not tanks then
+            early_return = true
+          end
+        end
+      end,
+      function()
+        if c.tanks and c.capacities then
+          tank_capacities = stubbornly(c.capacities)
+          if not tank_capacities then
             early_return = true
           end
         end
@@ -725,7 +734,8 @@ local function chest_wrap(chest, recursed)
           table.insert(l, fluid_start+fi, {
             name = fluid.name,
             count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
-            limit = 1/0, -- not really, but there's no way to know the real limit
+            limit = (tank_capacities and tank_capacities[fi]) or 1/0,
+            limit_is_constant = true,
             type = "f",
           })
         else
