@@ -729,7 +729,14 @@ local function chest_wrap(chest, recursed)
     local fluid_start = 100000 -- TODO: change this to omega
     if tanks then
       -- FIXME: how do i fetch displayname of fluids????
-      for fi,fluid in pairs(tanks) do
+      local tanks_count
+      if tank_capacities then
+        tanks_count = #tank_capacities
+      else
+        tanks_count = #tanks -- this is incorrect on forge!
+      end
+      for fi = 1,tanks_count do
+        local fluid = tanks[fi]
         local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
         if fluid.name ~= "minecraft:empty" then
           table.insert(l, fluid_start+fi, {
