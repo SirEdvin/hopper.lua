@@ -528,6 +528,7 @@ end
 local upw_max_item_transfer = 128 -- default value, we dynamically discover the exact value later
 local upw_max_fluid_transfer = 65500 -- defaults vary but 65500 seems to be the smallest
 local upw_max_energy_transfer = 1 -- not even remotely true but the real limit varies per peripheral
+local upw_item_storage_api_version = {1, 1}  -- default value is 1.1, we dynamicaqlly discover it 
 
 -- returns if container is an UnlimitedPeripheralWorks container
 local function isUPW(c)
@@ -918,7 +919,7 @@ local function chest_wrap(chest, recursed)
     end
     c.pushItems = function(other_peripheral, from_slot_identifier, count, to_slot_number, additional_info)
       local item_name = string.match(from_slot_identifier, "[^;]*")
-      return c.pushItem(other_peripheral, item_name, count)
+      return c.pushItem(other_peripheral, item_name, count, to_slot_number)
     end
     c.pullItems = function(other_peripheral, from_slot_number, count, to_slot_number, additional_info)
       local item_name = nil
@@ -926,7 +927,7 @@ local function chest_wrap(chest, recursed)
         item_name = s.name
         break
       end
-      return c.pullItem(other_peripheral, item_name, count)
+      return c.pullItem(other_peripheral, item_name, count, from_slot_number)
     end
   end
   if not (c.list or c.tanks or c.pushEnergy) then
@@ -1010,6 +1011,7 @@ local function chest_wrap(chest, recursed)
       upw_configuration = c.getConfiguration()
       upw_max_item_transfer = upw_configuration.itemStorageTransferLimit or upw_max_item_transfer
       upw_max_item_transfer = upw_configuration.fluidStorageTransferLimit or upw_max_item_transfer
+      upw_item_storage_api_version = upw_configuration.
     end
 
     local limit_override, limit_is_constant = hardcoded_limit_overrides(c)
