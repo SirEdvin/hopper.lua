@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11272015"
+version = "v1.5 ALPHA11272216"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -1043,7 +1043,7 @@ local function chest_wrap(chest, recursed)
       upw_configuration = c.getConfiguration()
       upw_max_item_transfer = upw_configuration.itemStorageTransferLimit or upw_max_item_transfer
       upw_max_item_transfer = upw_configuration.fluidStorageTransferLimit or upw_max_item_transfer
-      upw_item_storage_api_version = upw_configuration.
+      upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
     end
 
     local limit_override, limit_is_constant = hardcoded_limit_overrides(c)
