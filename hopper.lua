@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11272216"
+version = "v1.5 ALPHA11280815"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -875,7 +875,11 @@ local function chest_wrap(chest, recursed)
     if isAE2(c) then
       c.isAE2 = true
     end
-    if options.denySlotless then
+    if c.getConfiguration then
+      local upw_configuration = c.getConfiguration()
+      upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
+    end
+    if options.denySlotless and upw_item_storage_api_version[2] < 2 then
       error("cannot use "..options.denySlotless.." when transferring to/from UPW peripheral")
     end
 
@@ -900,24 +904,24 @@ local function chest_wrap(chest, recursed)
     c.size = nil
     c.pushItemRaw = c.pushItem
     c.pullItemRaw = c.pullItem
-    c.pushItem = function(to, query, limit)
+    c.pushItem = function(to, query, limit, to_slot_number)
       -- pushItem and pullItem are rate limited
       -- so we have to keep calling it over and over
       local total = 0
       while true do
-        local amount = c.pushItemRaw(to, query, limit-total)
+        local amount = c.pushItemRaw(to, query, limit-total, to_slot_number)
         total = total+amount
         if amount < upw_max_item_transfer or total == limit then
           return total
         end
       end
     end
-    c.pullItem = function(from, query, limit)
+    c.pullItem = function(from, query, limit, from_slot_number)
       -- pushItem and pullItem are rate limited
       -- so we have to keep calling it over and over
       local total = 0
       while true do
-        local amount = c.pullItemRaw(from, query, limit-total)
+        local amount = c.pullItemRaw(from, query, limit-total, from_slot_number)
         total = total+amount
         if amount < upw_max_item_transfer or total == limit then
           return total
@@ -1043,7 +1047,6 @@ local function chest_wrap(chest, recursed)
       upw_configuration = c.getConfiguration()
       upw_max_item_transfer = upw_configuration.itemStorageTransferLimit or upw_max_item_transfer
       upw_max_item_transfer = upw_configuration.fluidStorageTransferLimit or upw_max_item_transfer
-      upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
     end
 
     local limit_override, limit_is_constant = hardcoded_limit_overrides(c)
@@ -1143,17 +1146,19 @@ local function chest_wrap(chest, recursed)
       end
       for fi = 1,tanks_count do
         local fluid = tanks[fi]
-        local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
-        if fluid.name ~= "minecraft:empty" then
-          table.insert(l, fluid_start+fi, {
-            name = fluid.name,
-            count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
-            limit = slot_limit,
-            limit_is_constant = true,
-            type = "f",
-          })
-        else
-          table.insert(l, fluid_start+fi, {type = "f", limit = slot_limit, limit_is_constant = true, count = 0})
+        if fluid ~= nil then -- In some cases, like with AE2 from UPW capacities can be bigger then present fluids
+          local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
+          if fluid.name ~= "minecraft:empty" then
+            table.insert(l, fluid_start+fi, {
+              name = fluid.name,
+              count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
+              limit = slot_limit,
+              limit_is_constant = true,
+              type = "f",
+            })
+          else
+            table.insert(l, fluid_start+fi, {type = "f", limit = slot_limit, limit_is_constant = true, count = 0})
+          end
         end
       end
       if c.isAE2 or c.getInfo then
