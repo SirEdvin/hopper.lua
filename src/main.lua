@@ -968,6 +968,9 @@ local function num_in_ranges(num, ranges, size)
 end
 
 local function has_tag(tag, name)
+  if tags_cache[name] == nil then
+    return nil
+  end
   return tags_cache[name][tag]
 end
 
