@@ -475,7 +475,8 @@ local function chest_wrap(chest, recursed)
       local upw_configuration = c.getConfiguration()
       upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
     end
-    if options.denySlotless and upw_item_storage_api_version[2] < 2 then
+    -- We use here equal, because major change would truly break something
+    if options.denySlotless and upw_item_storage_api_version[1] == 1 and upw_item_storage_api_version[2] < 2 then
       error("cannot use "..options.denySlotless.." when transferring to/from UPW peripheral")
     end
 
