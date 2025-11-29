@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11291447"
+version = "v1.5 ALPHA11291449"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2069,7 +2069,10 @@ local function hopper_step(from, to)
       local dii = nil
       while true do
         if sw == 0 then break end
-        if s.transfer_strikes >= transfer_strike_out then break end
+        -- if there's too many inactive destination peripherals
+        -- they can cause the source to be incorrectly blamed
+        -- so for now we'll only strike destinations
+        -- if s.transfer_strikes >= transfer_strike_out then break end
         if iteration_mode == "done" then break end
         if not dii then
           if iteration_mode == "begin" then
