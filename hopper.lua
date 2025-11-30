@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11291425"
+version = "v1.5 ALPHA11291449"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -567,6 +567,7 @@ end
 local upw_max_item_transfer = 128 -- default value, we dynamically discover the exact value later
 local upw_max_fluid_transfer = 65500 -- defaults vary but 65500 seems to be the smallest
 local upw_max_energy_transfer = 1 -- not even remotely true but the real limit varies per peripheral
+local upw_item_storage_api_version = {1, 1}  -- default value is 1.1, we dynamicaqlly discover it 
 
 -- returns if container is an UnlimitedPeripheralWorks container
 local function isUPW(c)
@@ -874,7 +875,12 @@ local function chest_wrap(chest, recursed)
     if isAE2(c) then
       c.isAE2 = true
     end
-    if options.denySlotless then
+    if c.getConfiguration then
+      local upw_configuration = c.getConfiguration()
+      upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
+    end
+    -- We use here equal, because major change would truly break something
+    if options.denySlotless and upw_item_storage_api_version[1] == 1 and upw_item_storage_api_version[2] < 2 then
       error("cannot use "..options.denySlotless.." when transferring to/from UPW peripheral")
     end
 
@@ -899,24 +905,24 @@ local function chest_wrap(chest, recursed)
     c.size = nil
     c.pushItemRaw = c.pushItem
     c.pullItemRaw = c.pullItem
-    c.pushItem = function(to, query, limit)
+    c.pushItem = function(to, query, limit, to_slot_number)
       -- pushItem and pullItem are rate limited
       -- so we have to keep calling it over and over
       local total = 0
       while true do
-        local amount = c.pushItemRaw(to, query, limit-total)
+        local amount = c.pushItemRaw(to, query, limit-total, to_slot_number)
         total = total+amount
         if amount < upw_max_item_transfer or total == limit then
           return total
         end
       end
     end
-    c.pullItem = function(from, query, limit)
+    c.pullItem = function(from, query, limit, from_slot_number)
       -- pushItem and pullItem are rate limited
       -- so we have to keep calling it over and over
       local total = 0
       while true do
-        local amount = c.pullItemRaw(from, query, limit-total)
+        local amount = c.pullItemRaw(from, query, limit-total, from_slot_number)
         total = total+amount
         if amount < upw_max_item_transfer or total == limit then
           return total
@@ -925,7 +931,7 @@ local function chest_wrap(chest, recursed)
     end
     c.pushItems = function(other_peripheral, from_slot_identifier, count, to_slot_number, additional_info)
       local item_name = string.match(from_slot_identifier, "[^;]*")
-      return c.pushItem(other_peripheral, item_name, count)
+      return c.pushItem(other_peripheral, item_name, count, to_slot_number)
     end
     c.pullItems = function(other_peripheral, from_slot_number, count, to_slot_number, additional_info)
       local item_name = nil
@@ -933,7 +939,7 @@ local function chest_wrap(chest, recursed)
         item_name = s.name
         break
       end
-      return c.pullItem(other_peripheral, item_name, count)
+      return c.pullItem(other_peripheral, item_name, count, from_slot_number)
     end
   end
   if not (c.list or c.tanks or c.pushEnergy) then
@@ -1141,17 +1147,19 @@ local function chest_wrap(chest, recursed)
       end
       for fi = 1,tanks_count do
         local fluid = tanks[fi]
-        local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
-        if fluid.name ~= "minecraft:empty" then
-          table.insert(l, fluid_start+fi, {
-            name = fluid.name,
-            count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
-            limit = slot_limit,
-            limit_is_constant = true,
-            type = "f",
-          })
-        else
-          table.insert(l, fluid_start+fi, {type = "f", limit = slot_limit, limit_is_constant = true, count = 0})
+        if fluid ~= nil then -- In some cases, like with AE2 from UPW capacities can be bigger then present fluids
+          local slot_limit = (tank_capacities and tank_capacities[fi]) or 1/0
+          if fluid.name ~= "minecraft:empty" then
+            table.insert(l, fluid_start+fi, {
+              name = fluid.name,
+              count = math.max(fluid.amount, 1), -- api rounds all amounts down, so amounts <1mB appear as 0, yet take up space
+              limit = slot_limit,
+              limit_is_constant = true,
+              type = "f",
+            })
+          else
+            table.insert(l, fluid_start+fi, {type = "f", limit = slot_limit, limit_is_constant = true, count = 0})
+          end
         end
       end
       if c.isAE2 or c.getInfo then
