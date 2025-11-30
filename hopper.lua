@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11291449"
+version = "v1.5 ALPHA11301932"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -567,7 +567,7 @@ end
 local upw_max_item_transfer = 128 -- default value, we dynamically discover the exact value later
 local upw_max_fluid_transfer = 65500 -- defaults vary but 65500 seems to be the smallest
 local upw_max_energy_transfer = 1 -- not even remotely true but the real limit varies per peripheral
-local upw_item_storage_api_version = {1, 1}  -- default value is 1.1, we dynamicaqlly discover it 
+local upw_item_storage_api_version = {1, 1} -- default value is 1.1, we dynamically discover it
 
 -- returns if container is an UnlimitedPeripheralWorks container
 local function isUPW(c)
@@ -879,7 +879,7 @@ local function chest_wrap(chest, recursed)
       local upw_configuration = c.getConfiguration()
       upw_item_storage_api_version = upw_configuration.itemStorageAPI or upw_item_storage_api_version
     end
-    -- We use here equal, because major change would truly break something
+    -- we use equal here because major change would truly break something
     if options.denySlotless and upw_item_storage_api_version[1] == 1 and upw_item_storage_api_version[2] < 2 then
       error("cannot use "..options.denySlotless.." when transferring to/from UPW peripheral")
     end
