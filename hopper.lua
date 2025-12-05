@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA11301932"
+version = "v1.5 ALPHA12051559"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -1373,6 +1373,9 @@ local function num_in_ranges(num, ranges, size)
 end
 
 local function has_tag(tag, name)
+  if tags_cache[name] == nil then
+    error("Cannot find tags for " + name)
+  end
   return tags_cache[name][tag]
 end
 

@@ -969,6 +969,9 @@ local function num_in_ranges(num, ranges, size)
 end
 
 local function has_tag(tag, name)
+  if tags_cache[name] == nil then
+    error("Cannot find tags for " + name)
+  end
   return tags_cache[name][tag]
 end
 
