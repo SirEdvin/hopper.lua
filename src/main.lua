@@ -609,8 +609,6 @@ local function chest_wrap(chest, recursed)
           end
           if l[i].tags then
             tags_cache[l[i].name] = l[i].tags
-          else
-            tags_cache[l[i].name] = {}
           end
         end
       end
@@ -972,7 +970,8 @@ end
 
 local function has_tag(tag, name)
   if tags_cache[name] == nil then
-    error("Cannot find tags for " .. name)
+    -- For some reason this happens for fluids
+    return false
   end
   return tags_cache[name][tag]
 end
