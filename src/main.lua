@@ -609,6 +609,8 @@ local function chest_wrap(chest, recursed)
           end
           if l[i].tags then
             tags_cache[l[i].name] = l[i].tags
+          else
+            tags_cache[l[i].name] = {}
           end
         end
       end
@@ -1403,8 +1405,6 @@ local function sort_dests(dests)
         return true
       end
       return left.name < right.name
-    elseif left.nbt ~= right.nbt then
-      return left.nbt < right.nbt
     end
   end)
 end

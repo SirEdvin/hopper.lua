@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12051602"
+version = "v1.5 ALPHA12051823"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -1013,6 +1013,8 @@ local function chest_wrap(chest, recursed)
           end
           if l[i].tags then
             tags_cache[l[i].name] = l[i].tags
+          else
+            tags_cache[l[i].name] = {}
           end
         end
       end
@@ -1807,8 +1809,6 @@ local function sort_dests(dests)
         return true
       end
       return left.name < right.name
-    elseif left.nbt ~= right.nbt then
-      return left.nbt < right.nbt
     end
   end)
 end
