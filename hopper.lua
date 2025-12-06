@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12060808"
+version = "v1.5 ALPHA12060816"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2281,7 +2281,11 @@ local function hopper_loop(commands)
         scan_task_manager = TaskManager:new(PROVISIONS.global_options.scan_threads),
         myself = Myself:new(),
       }
-      if command.options.conditions and command.options.conditions.global and pcall(command.options.conditions.global) then
+      local should_skip = false
+      if command.options.conditions and command.options.conditions.global then
+        should_skip = pcall(command.options.conditions.global) or false
+      end
+      if not should_skip then
         local success, error_msg = provide(provisions, function()
           return pcall(hopper_step, command.from, command.to)
         end)
