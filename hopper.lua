@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12060816"
+version = "v1.5 ALPHA12060820"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2726,7 +2726,7 @@ local primary_flags = {
         per_nbt = limit.per_nbt,
         count_all = limit.count_all,
       })
-    end
+    end,
     ["-conditions"] = function(c)
       table.insert(PROVISIONS.options.conditions, c)
     end
