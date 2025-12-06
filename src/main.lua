@@ -1878,8 +1878,8 @@ local function hopper_loop(commands)
         myself = Myself:new(),
       }
       local should_skip = false
-      if command.options.conditions and command.options.conditions.global then
-        local call_result = {pcall(command.options.conditions.global)}
+      if command.options.condition then
+        local call_result = {pcall(command.options.condition)}
         if call_result[1] then
           should_skip = should_skip or not call_result[2]
         end

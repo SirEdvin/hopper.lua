@@ -278,8 +278,11 @@ local primary_flags = {
       })
     end
   end,
-  ["-conditions"] = function(c)
-    PROVISIONS.options.conditions = c
+  ["-condition"] = function(c)
+    if (type(c) ~= "function") then
+      error("condition suppose to be function")
+    end
+    PROVISIONS.options.condition = c
   end
 }
 

@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12060839"
+version = "v1.5 ALPHA12060908"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2282,8 +2282,8 @@ local function hopper_loop(commands)
         myself = Myself:new(),
       }
       local should_skip = false
-      if command.options.conditions and command.options.conditions.global then
-        local call_result = {pcall(command.options.conditions.global)}
+      if command.options.condition then
+        local call_result = {pcall(command.options.condition)}
         if call_result[1] then
           should_skip = should_skip or not call_result[2]
         end
@@ -2731,8 +2731,11 @@ local primary_flags = {
       })
     end
   end,
-  ["-conditions"] = function(c)
-    PROVISIONS.options.conditions = c
+  ["-condition"] = function(c)
+    if (type(c) ~= "function") then
+      error("condition suppose to be function")
+    end
+    PROVISIONS.options.condition = c
   end
 }
 
