@@ -276,11 +276,11 @@ local primary_flags = {
         per_nbt = limit.per_nbt,
         count_all = limit.count_all,
       })
-    end,
-    ["-conditions"] = function(c)
-      table.insert(PROVISIONS.options.conditions, c)
     end
   end,
+  ["-conditions"] = function(c)
+    table.insert(PROVISIONS.options.conditions, c)
+  end
 }
 
 -- the flags table that'll actually be used
