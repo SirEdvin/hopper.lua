@@ -1879,7 +1879,10 @@ local function hopper_loop(commands)
       }
       local should_skip = false
       if command.options.conditions and command.options.conditions.global then
-        should_skip = pcall(command.options.conditions.global) or false
+        local call_result = {pcall(command.options.conditions.global)}
+        if call_result[1] then
+          should_skip = should_skip or not call_result[2]
+        end
       end
       if not should_skip then
         local success, error_msg = provide(provisions, function()

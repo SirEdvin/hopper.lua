@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12060824"
+version = "v1.5 ALPHA12060839"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2283,7 +2283,10 @@ local function hopper_loop(commands)
       }
       local should_skip = false
       if command.options.conditions and command.options.conditions.global then
-        should_skip = pcall(command.options.conditions.global) or false
+        local call_result = {pcall(command.options.conditions.global)}
+        if call_result[1] then
+          should_skip = should_skip or not call_result[2]
+        end
       end
       if not should_skip then
         local success, error_msg = provide(provisions, function()
@@ -2729,7 +2732,7 @@ local primary_flags = {
     end
   end,
   ["-conditions"] = function(c)
-    table.insert(PROVISIONS.options.conditions, c)
+    PROVISIONS.options.conditions = c
   end
 }
 

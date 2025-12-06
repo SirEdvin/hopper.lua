@@ -279,7 +279,7 @@ local primary_flags = {
     end
   end,
   ["-conditions"] = function(c)
-    table.insert(PROVISIONS.options.conditions, c)
+    PROVISIONS.options.conditions = c
   end
 }
 
