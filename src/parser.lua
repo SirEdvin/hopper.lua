@@ -277,6 +277,9 @@ local primary_flags = {
         count_all = limit.count_all,
       })
     end
+    ["-conditions"] = function(c)
+      table.insert(PROVISIONS.options.conditions, c)
+    end
   end,
 }
 

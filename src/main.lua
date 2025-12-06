@@ -1877,9 +1877,11 @@ local function hopper_loop(commands)
         scan_task_manager = TaskManager:new(PROVISIONS.global_options.scan_threads),
         myself = Myself:new(),
       }
-      local success, error_msg = provide(provisions, function()
-        return pcall(hopper_step, command.from, command.to)
-      end)
+      if command.options.conditions and command.options.conditions.global and pcall(command.options.conditions.global) then
+        local success, error_msg = provide(provisions, function()
+          return pcall(hopper_step, command.from, command.to)
+        end)
+      end
       PROVISIONS.hoppering_stage = nil
       provisions.myself:destructor()
 

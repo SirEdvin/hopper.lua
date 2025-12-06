@@ -3,7 +3,7 @@
 
 local _ENV = setmetatable({}, {__index = _ENV})
 
-version = "v1.5 ALPHA12051825"
+version = "v1.5 ALPHA12060808"
 
 help_message = [[
 hopper.lua ]]..version..[[, made by umnikos
@@ -2281,9 +2281,11 @@ local function hopper_loop(commands)
         scan_task_manager = TaskManager:new(PROVISIONS.global_options.scan_threads),
         myself = Myself:new(),
       }
-      local success, error_msg = provide(provisions, function()
-        return pcall(hopper_step, command.from, command.to)
-      end)
+      if command.options.conditions and command.options.conditions.global and pcall(command.options.conditions.global) then
+        local success, error_msg = provide(provisions, function()
+          return pcall(hopper_step, command.from, command.to)
+        end)
+      end
       PROVISIONS.hoppering_stage = nil
       provisions.myself:destructor()
 
@@ -2720,6 +2722,9 @@ local primary_flags = {
         per_nbt = limit.per_nbt,
         count_all = limit.count_all,
       })
+    end
+    ["-conditions"] = function(c)
+      table.insert(PROVISIONS.options.conditions, c)
     end
   end,
 }
